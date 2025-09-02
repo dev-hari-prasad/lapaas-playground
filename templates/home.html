@@ -1,9 +1,43 @@
 {% extends 'base.html' %}
 {% block title %}Home • Lapaas Playground{% endblock %}
 {% block content %}
-<div class="card">
-    <h2 style="margin:0 0 10px 0;">Welcome</h2>
-    <div class="muted">Choose a task from the navigation: describe images with FastVLM or classify with MobileCLIP.
-        Upload on the left, see output and timings on the right.</div>
+<div class="card" style="padding: 28px; display:flex; align-items:center; gap:18px; flex-wrap:wrap;">
+    <img src="/static/img/lapaas_logo.png" alt="Lapaas" style="height:56px; width:auto; border-radius:8px;">
+    <div style="flex:1; min-width:260px;">
+        <h1 style="margin:0 0 6px 0; font-size:1.6rem;">Lapaas Playground</h1>
+        <div class="muted">Test image understanding models side-by-side. Mobile friendly. Open source.</div>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn" href="/fastvlm">Try FastVLM</a>
+        <a class="btn" href="/mobileclip" style="background:#0ea5e9;">Try MobileCLIP</a>
+        <a class="btn" href="https://github.com/lapaasindia/lapaas-playground" target="_blank" style="background:#10b981;">GitHub</a>
+    </div>
+    <div style="width:100%; height:1px; background:#1f2937; margin:14px 0;"></div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; width:100%;" id="features">
+        <div class="card" style="padding:14px;">
+            <div style="font-weight:600; margin-bottom:6px;">FastVLM (Describe)</div>
+            <div class="muted">Upload an image and get a detailed description with timing.</div>
+        </div>
+        <div class="card" style="padding:14px;">
+            <div style="font-weight:600; margin-bottom:6px;">MobileCLIP (Classify)</div>
+            <div class="muted">Enter labels and get zero-shot probabilities quickly.</div>
+        </div>
+        <div class="card" style="padding:14px;">
+            <div style="font-weight:600; margin-bottom:6px;">CPU or GPU</div>
+            <div class="muted">Runs on CPU out-of-the-box; add GPU later for speed.</div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Stack features on small screens
+const mq = window.matchMedia('(max-width: 900px)');
+function adjustFeatures(){
+  const f = document.getElementById('features');
+  if (!f) return;
+  f.style.gridTemplateColumns = mq.matches ? '1fr' : 'repeat(3, 1fr)';
+}
+mq.addEventListener('change', adjustFeatures);
+adjustFeatures();
+</script>
 {% endblock %}

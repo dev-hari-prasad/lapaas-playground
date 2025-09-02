@@ -121,6 +121,17 @@
             white-space: pre-wrap;
             word-wrap: break-word;
         }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .nav { flex-wrap: wrap; gap: 10px; }
+            .nav .brand span { font-size: 0.95rem; }
+            .page { margin: 16px auto; padding: 0 14px; }
+            .sxs { flex-direction: column; }
+            .btn { width: 100%; }
+            .drop { padding: 18px; }
+            .preview { max-height: 240px; }
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
