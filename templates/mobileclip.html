@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}MobileCLIP • Classify{% endblock %}
+{% block content %}
+<div class="sxs">
+    <div class="card grow">
+        <div class="muted" style="margin-bottom:8px;">Input</div>
+        <div id="drop" class="drop">
+            <div><i class="fas fa-cloud-upload-alt"></i></div>
+            <div>Drop image or click to browse</div>
+            <input id="file" type="file" accept="image/*" style="display:none;" />
+        </div>
+        <img id="preview" class="preview" style="display:none;" />
+        <input id="labels" class="input" placeholder="Comma-separated labels e.g. a diagram, a dog, a cat"
+            style="margin-top:12px;" />
+        <button id="run" class="btn" style="margin-top:12px;">Classify</button>
+    </div>
+    <div class="card grow">
+        <div class="muted" style="margin-bottom:8px;">Output</div>
+        <div id="timing" class="muted" style="margin-bottom:8px;"></div>
+        <pre id="out">Upload an image and enter labels to run MobileCLIP.</pre>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        const drop = document.getElementById('drop');
+        const file = document.getElementById('file');
+        const preview = document.getElementById('preview');
+        const labels = document.getElementById('labels');
+        const runBtn = document.getElementById('run');
+        const out = document.getElementById('out');
+        const timing = document.getElementById('timing');
+        let selectedFile = null;
+
+        drop.addEventListener('click', () => file.click());
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => drop.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); }));
+        drop.addEventListener('drop', ev => { const f = ev.dataTransfer.files?.[0]; if (f) setFile(f); });
+        file.addEventListener('change', ev => { const f = ev.target.files?.[0]; if (f) setFile(f); });
+
+        function setFile(f) { selectedFile = f; const r = new FileReader(); r.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; }; r.readAsDataURL(f); }
+
+        runBtn.addEventListener('click', async () => {
+            if (!selectedFile) { out.textContent = 'Please choose an image.'; return; }
+            if (!labels.value.trim()) { out.textContent = 'Please enter labels.'; return; }
+            runBtn.disabled = true; out.textContent = 'Running...'; timing.textContent = '';
+            const form = new FormData(); form.append('image', selectedFile); form.append('labels', labels.value.trim());
+            const res = await fetch('/api/mobileclip', { method: 'POST', body: form });
+            const data = await res.json();
+            if (!data.success) { out.textContent = 'Error: ' + (data.error || 'unknown'); runBtn.disabled = false; return; }
+            const rows = data.labels.map((l, i) => `${String(i + 1).padStart(2, '0')}. ${l}: ${data.probs[i]}`);
+            out.textContent = `Top-1: ${data.top1.label} (${data.top1.prob})\n\n` + rows.join('\n');
+            timing.textContent = `Total: ${data.total_time}s • Prediction: ${data.prediction_time}s`;
+            runBtn.disabled = false;
+        });
+    </script>
+    {% endblock %}
